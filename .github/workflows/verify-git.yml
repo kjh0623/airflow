@@ -1,0 +1,18 @@
+name: verify-git-noref
+on:
+  push:
+    branches: [ci/git-noref-verify]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.11"
+      - run: >
+          sudo apt-get update -q && sudo apt-get install -y --no-install-recommends
+          libkrb5-dev default-libmysqlclient-dev libldap2-dev libsasl2-dev pkg-config
+      - run: uv sync
+      - run: uv run pytest providers/git/tests/unit/git/bundles/test_git.py -v
