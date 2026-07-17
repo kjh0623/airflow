@@ -1,0 +1,25 @@
+# Temporary workflow to verify the repro tests on Linux CI (this branch only).
+# Will be removed before opening the upstream PR.
+name: repro-queued-stuck
+on:
+  push:
+    branches: [fix/queued-dagrun-stuck-unresolvable-version]
+  workflow_dispatch:
+
+jobs:
+  repro-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.11"
+      - name: Install airflow dev environment
+        run: uv sync
+      - name: Run repro tests
+        run: >
+          uv run pytest
+          "airflow-core/tests/unit/jobs/test_scheduler_job.py::TestSchedulerJob::test_queued_dagrun_with_unresolvable_pinned_version_is_stuck_forever"
+          "airflow-core/tests/unit/jobs/test_scheduler_job.py::TestSchedulerJob::test_queued_dagrun_without_bundle_version_falls_back_to_latest"
+          -v
